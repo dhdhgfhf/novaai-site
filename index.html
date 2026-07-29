@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تحميل NovaAI…</title>
+<style>
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{display:grid;place-items:center;background:#0d0d12;color:#ededf5;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}.box{text-align:center;padding:24px}.gem{width:58px;height:58px;margin:0 auto 16px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#7c6aff,#ff6b9d);font-size:24px;box-shadow:0 0 30px rgba(124,106,255,.28);animation:p 1.4s ease-in-out infinite}.msg{font-size:14px;color:#9999b5}.err{max-width:520px;line-height:1.7;color:#ff8bad;white-space:pre-wrap}@keyframes p{50%{transform:scale(1.07);box-shadow:0 0 42px rgba(124,106,255,.42)}}
+</style>
+</head>
+<body>
+<div class="box"><div class="gem">✦</div><div id="status" class="msg">جاري تشغيل NovaAI…</div></div>
+<script>
+(async()=>{
+  const status=document.getElementById('status');
+  try{
+    if(typeof DecompressionStream==='undefined') throw new Error('المتصفح قديم ولا يدعم فك ضغط التطبيق. افتح الرابط في أحدث إصدار من Chrome أو Edge.');
+    const names=['app-1.b64','app-2.b64','app-3.b64'];
+    const parts=await Promise.all(names.map(async name=>{
+      const r=await fetch(name+'?v=1',{cache:'no-store'});
+      if(!r.ok) throw new Error('تعذر تحميل '+name+' — HTTP '+r.status);
+      return (await r.text()).trim();
+    }));
+    const binary=atob(parts.join(''));
+    const bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+    const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+    const html=await new Response(stream).text();
+    document.open();
+    document.write(html);
+    document.close();
+  }catch(e){
+    status.className='err';
+    status.textContent='تعذر تشغيل NovaAI.\n\n'+(e?.message||e)+'\n\nحدّث الصفحة أو افتحها في Chrome.';
+    console.error(e);
+  }
+})();
+</script>
+</body>
+</html>
