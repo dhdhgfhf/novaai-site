@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NOVA AI</title>
+<style>*{box-sizing:border-box}html,body{height:100%;margin:0}body{display:grid;place-items:center;background:#0d0d12;color:#ededf5;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}.box{text-align:center;padding:24px}.logo{font-size:32px;font-weight:800;margin-bottom:10px}.msg{font-size:14px;color:#9999b5}.err{max-width:560px;line-height:1.8;color:#ff8bad;white-space:pre-wrap}</style>
+</head>
+<body><div class="box"><div class="logo">NOVA AI</div><div class="msg" id="status">جاري تشغيل الموقع…</div></div>
+<script>
+(async()=>{
+ try{
+  let source=await fetch('../index.html?v=nova-ai-36',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('تعذر تحميل الموقع');return r.text()});
+  source=source.replaceAll('NovaAI','NOVA AI');
+  source=source.replaceAll("'app-1.b64'","'../app-1.b64'").replaceAll("'app-2.b64'","'../app-2.b64'").replaceAll("'app-3.b64'","'../app-3.b64'");
+  const lock36=`(() => {
+    try {
+      modelVersion='classic';
+      const originalSelectModelVersion=selectModelVersion;
+      selectModelVersion=function(_version,event){return originalSelectModelVersion('classic',event)};
+      document.querySelector('.model-option[data-v="nova4"]')?.remove();
+      const badge=document.getElementById('version-badge');if(badge)badge.textContent='Nova 3.6';
+      const welcome=document.getElementById('welcome-version');if(welcome)welcome.textContent='Nova 3.6 · ذاكرة متعددة';
+      const callModel=document.getElementById('call-model');if(callModel)callModel.textContent='Nova 3.6 · محادثة مباشرة';
+      updateModelSelectorUI();
+      saveState();
+    } catch(e) {}
+  })();`;
+  const target='let html=await new Response(stream).text();';
+  const injection=target+
+    "html=html.replaceAll('Nova'+'AI','NOVA AI');"+
+    "html=html.replaceAll('novaai_state_v3','novaai_state_36').replaceAll('novaai_state_v2','novaai_state_36_legacy');"+
+    "html=html.replace(/<button class=\\\"selector-option model-option\\\" data-v=\\\"nova4\\\"[\\s\\S]*?<\\/button>/,'');"+
+    "html=html.replaceAll('Nova 3.6 + Nova 4.0 · ذاكرة متعددة','Nova 3.6 · ذاكرة متعددة').replaceAll('Nova 4.0 · محادثة مباشرة','Nova 3.6 · محادثة مباشرة');"+
+    'const lock36='+JSON.stringify(lock36)+';'+
+    "html=html.replace('</body>','<scr'+'ipt>'+lock36+'</scr'+'ipt></body>');";
+  source=source.replace(target,injection);
+  document.open();document.write(source);document.close();
+ }catch(e){const s=document.getElementById('status');s.className='err';s.textContent='حدثت مشكلة أثناء تشغيل NOVA AI: '+(e?.message||e)}
+})();
+</script></body></html>
