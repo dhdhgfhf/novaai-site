@@ -4,36 +4,39 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NOVA AI</title>
-<style>
-*{box-sizing:border-box}html,body{height:100%;margin:0}body{display:grid;place-items:center;background:#0d0d12;color:#ededf5;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}.box{text-align:center;padding:24px}.logo{font-size:32px;font-weight:800;margin-bottom:10px}.msg{font-size:14px;color:#9999b5}.err{max-width:560px;line-height:1.8;color:#ff8bad;white-space:pre-wrap}
-</style>
+<style>*{box-sizing:border-box}html,body{height:100%;margin:0}body{display:grid;place-items:center;background:#0d0d12;color:#ededf5;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}.box{text-align:center;padding:24px}.logo{font-size:32px;font-weight:800;margin-bottom:10px}.msg{font-size:14px;color:#9999b5}.err{max-width:580px;line-height:1.8;color:#ff8bad;white-space:pre-wrap}</style>
 </head>
 <body><div class="box"><div class="logo">NOVA AI</div><div class="msg" id="status">جاري تشغيل الموقع…</div></div>
 <script>
 (async()=>{
+ const status=document.getElementById('status');
  try{
-  if(typeof DecompressionStream==='undefined')throw new Error('افتح الموقع في أحدث إصدار من Chrome أو Edge.');
+  if(typeof DecompressionStream==='undefined')throw new Error('افتح الموقع في أحدث إصدار من Chrome.');
+  const decodeBase64=(input)=>{
+   const alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+   const map=new Int16Array(128);map.fill(-1);
+   for(let i=0;i<alphabet.length;i++)map[alphabet.charCodeAt(i)]=i;
+   const clean=input.replace(/[^A-Za-z0-9+/]/g,'');
+   const out=[];let buffer=0,bits=0;
+   for(let i=0;i<clean.length;i++){
+    const code=clean.charCodeAt(i);const value=code<128?map[code]:-1;if(value<0)continue;
+    buffer=(buffer<<6)|value;bits+=6;
+    if(bits>=8){bits-=8;out.push((buffer>>bits)&255);buffer&=(1<<bits)-1;}
+   }
+   return new Uint8Array(out);
+  };
   const names=['app-1.b64','app-2.b64','app-3.b64'];
   const parts=await Promise.all(names.map(async name=>{
-   const r=await fetch(name+'?v=separate-base64-decode-2',{cache:'no-store'});
+   const r=await fetch(name+'?v=manual-decoder-4',{cache:'no-store'});
    if(!r.ok)throw new Error('تعذر تحميل '+name+' — HTTP '+r.status);
    return await r.text();
   }));
-  const decodedParts=parts.map(part=>{
-   let encoded=part.replace(/\s+/g,'').replace(/[^A-Za-z0-9+\/=]/g,'');
-   encoded+='='.repeat((4-encoded.length%4)%4);
-   const binary=atob(encoded);
-   const chunk=new Uint8Array(binary.length);
-   for(let i=0;i<binary.length;i++)chunk[i]=binary.charCodeAt(i);
-   return chunk;
-  });
-  const totalLength=decodedParts.reduce((sum,chunk)=>sum+chunk.length,0);
-  const bytes=new Uint8Array(totalLength);
-  let byteOffset=0;
-  for(const chunk of decodedParts){bytes.set(chunk,byteOffset);byteOffset+=chunk.length;}
+  const bytes=decodeBase64(parts.join(''));
+  if(bytes.length<2||bytes[0]!==31||bytes[1]!==139)throw new Error('ملفات نسخة 3.6 المنشورة غير مكتملة.');
   const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
-  const html=await new Response(stream).text();
+  let html=await new Response(stream).text();
+  html=html.replaceAll('NovaAI','NOVA AI').replace('<title>NOVA AI 4.0</title>','<title>NOVA AI</title>');
   document.open();document.write(html);document.close();
- }catch(e){const s=document.getElementById('status');s.className='err';s.textContent='حدثت مشكلة أثناء تشغيل NOVA AI: '+(e?.message||e)}
+ }catch(e){status.className='err';status.textContent='حدثت مشكلة أثناء تشغيل NOVA AI: '+(e?.message||e);}
 })();
 </script></body></html>
