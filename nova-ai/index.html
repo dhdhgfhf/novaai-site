@@ -10,9 +10,10 @@
 <script>
 (async()=>{
  try{
-  let source=await fetch('../index.html?v=nova-ai',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('تعذر تحميل الموقع');return r.text()});
+  let source=await fetch('../index.html?v=nova-ai-base64-fix-1',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('تعذر تحميل الموقع');return r.text()});
   source=source.replaceAll('NovaAI','NOVA AI');
   source=source.replaceAll("'app-1.b64'","'../app-1.b64'").replaceAll("'app-2.b64'","'../app-2.b64'").replaceAll("'app-3.b64'","'../app-3.b64'");
+  source=source.replace("const binary=atob(parts.join(''));","let encoded=parts.join('').replace(/\\s+/g,'').replace(/[^A-Za-z0-9+\\/=]/g,'');encoded=encoded.replace(/=+(?=.)/g,'');encoded+='='.repeat((4-encoded.length%4)%4);const binary=atob(encoded);");
   source=source.replace('let html=await new Response(stream).text();',"let html=await new Response(stream).text();html=html.replaceAll('Nova'+'AI','NOVA AI').replace('<title>NOVA AI 4.0</title>','<title>NOVA AI</title>');");
   document.open();document.write(source);document.close();
  }catch(e){const s=document.getElementById('status');s.className='err';s.textContent='حدثت مشكلة أثناء تشغيل NOVA AI: '+(e?.message||e)}
