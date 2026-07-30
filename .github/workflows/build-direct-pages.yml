@@ -1,11 +1,11 @@
-name: Build embedded NOVA AI 3.6 page
+name: Build raw NOVA AI 3.6 page
 
 on:
   workflow_dispatch:
   push:
     branches: ["main"]
     paths:
-      - "scripts/build-original-embedded.mjs"
+      - "scripts/build-original-raw.mjs"
       - "nova-ai-3-6/app-*.b64"
       - ".github/workflows/build-direct-pages.yml"
 
@@ -19,20 +19,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build one-file original page
-        run: node scripts/build-original-embedded.mjs
+      - name: Build raw original page
+        run: node scripts/build-original-raw.mjs
 
-      - name: Verify one-file page
+      - name: Verify raw page
         run: |
           test -s nova-ai-original/index.html
-          if grep -qE 'part-[123]\.js|Failed to fetch|fetch\(' nova-ai-original/index.html; then
-            echo "Generated original page still depends on external files"
+          grep -q 'initApp' nova-ai-original/index.html
+          if grep -qE 'part-[123]\.js|Failed to fetch|fetch\(|DecompressionStream|const input=' nova-ai-original/index.html; then
+            echo "Generated page is still a loader instead of the raw app"
             exit 1
           fi
-          grep -q 'const input=' nova-ai-original/index.html
-          echo "Generated size: $(wc -c < nova-ai-original/index.html) bytes"
+          echo "Raw page size: $(wc -c < nova-ai-original/index.html) bytes"
 
-      - name: Commit generated original page
+      - name: Commit generated raw page
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -41,5 +41,5 @@ jobs:
             echo "No generated changes"
             exit 0
           fi
-          git commit -m "Build embedded NOVA AI 3.6 page"
+          git commit -m "Build raw NOVA AI 3.6 page"
           git push
