@@ -24,16 +24,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Verify original static page
+      - name: Build one-file NOVA AI 3.6 page
+        run: node scripts/build-original-embedded.mjs
+
+      - name: Verify embedded original page
         run: |
           test -s nova-ai-original/index.html
-          test -s nova-ai-original-live/part-1.js
-          test -s nova-ai-original-live/part-2.js
-          test -s nova-ai-original-live/part-3.js
-          if grep -q "Failed to fetch" nova-ai-original/index.html; then
-            echo "The original page still contains the old loader error"
+          if grep -qE 'part-[123]\.js|Failed to fetch|fetch\(' nova-ai-original/index.html; then
+            echo "Original page still depends on external loading"
             exit 1
           fi
+          grep -q 'const input=' nova-ai-original/index.html
+          echo "Embedded original page size: $(wc -c < nova-ai-original/index.html) bytes"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
