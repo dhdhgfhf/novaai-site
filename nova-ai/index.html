@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NOVA AI</title>
+<style>*{box-sizing:border-box}html,body{height:100%;margin:0}body{display:grid;place-items:center;background:#0d0d12;color:#ededf5;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}.box{text-align:center;padding:24px}.logo{font-size:32px;font-weight:800;margin-bottom:10px}.msg{font-size:14px;color:#9999b5}.err{max-width:560px;line-height:1.8;color:#ff8bad;white-space:pre-wrap}</style>
+</head>
+<body><div class="box"><div class="logo">NOVA AI</div><div class="msg" id="status">جاري تشغيل الموقع…</div></div>
+<script>
+(async()=>{
+ try{
+  let source=await fetch('../index.html?v=nova-ai',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('تعذر تحميل الموقع');return r.text()});
+  source=source.replaceAll("'app-1.b64'","'../app-1.b64'").replaceAll("'app-2.b64'","'../app-2.b64'").replaceAll("'app-3.b64'","'../app-3.b64'");
+  source=source.replace('let html=await new Response(stream).text();',"let html=await new Response(stream).text();html=html.replaceAll('NovaAI','NOVA AI').replace('<title>Nova AI 4.0</title>','<title>NOVA AI</title>');");
+  source=source.replaceAll('NovaAI','NOVA AI');
+  document.open();document.write(source);document.close();
+ }catch(e){const s=document.getElementById('status');s.className='err';s.textContent='حدثت مشكلة أثناء تشغيل NOVA AI: '+(e?.message||e)}
+})();
+</script></body></html>
