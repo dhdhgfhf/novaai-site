@@ -24,19 +24,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build standalone NOVA AI pages
-        run: node scripts/build-direct.mjs
-
-      - name: Verify generated pages
+      - name: Verify original static page
         run: |
-          test -s nova-ai-final/index.html
           test -s nova-ai-original/index.html
-          if grep -q "Failed to fetch" nova-ai-final/index.html nova-ai-original/index.html; then
-            echo "Generated pages still contain the old loader error"
+          test -s nova-ai-original-live/part-1.js
+          test -s nova-ai-original-live/part-2.js
+          test -s nova-ai-original-live/part-3.js
+          if grep -q "Failed to fetch" nova-ai-original/index.html; then
+            echo "The original page still contains the old loader error"
             exit 1
           fi
-          echo "Final page size: $(wc -c < nova-ai-final/index.html) bytes"
-          echo "Original page size: $(wc -c < nova-ai-original/index.html) bytes"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
