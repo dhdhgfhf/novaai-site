@@ -1,14 +1,12 @@
-name: Build direct NOVA AI pages
+name: Build embedded NOVA AI 3.6 page
 
 on:
   workflow_dispatch:
   push:
     branches: ["main"]
     paths:
-      - "scripts/build-direct.mjs"
-      - "app-*.b64"
+      - "scripts/build-original-embedded.mjs"
       - "nova-ai-3-6/app-*.b64"
-      - "index.html"
       - ".github/workflows/build-direct-pages.yml"
 
 permissions:
@@ -21,17 +19,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build standalone pages
-        run: node scripts/build-direct.mjs
+      - name: Build one-file original page
+        run: node scripts/build-original-embedded.mjs
 
-      - name: Commit generated pages
+      - name: Verify one-file page
+        run: |
+          test -s nova-ai-original/index.html
+          if grep -qE 'part-[123]\.js|Failed to fetch|fetch\(' nova-ai-original/index.html; then
+            echo "Generated original page still depends on external files"
+            exit 1
+          fi
+          grep -q 'const input=' nova-ai-original/index.html
+          echo "Generated size: $(wc -c < nova-ai-original/index.html) bytes"
+
+      - name: Commit generated original page
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add nova-ai-final/index.html nova-ai-original/index.html
+          git add nova-ai-original/index.html
           if git diff --cached --quiet; then
             echo "No generated changes"
             exit 0
           fi
-          git commit -m "Build standalone NOVA AI pages"
+          git commit -m "Build embedded NOVA AI 3.6 page"
           git push
