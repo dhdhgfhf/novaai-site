@@ -45,8 +45,13 @@ function readElevenLabsPatch(loaderHtml) {
   if (end < start) return '';
 
   const literal = loaderHtml.slice(start + 'const patch='.length, end).trim();
-  const patch = vm.runInNewContext(`(${literal})`, Object.create(null), { timeout: 1000 });
-  return typeof patch === 'string' ? patch : '';
+  try {
+    const patch = vm.runInNewContext(`(${literal})`, Object.create(null), { timeout: 1000 });
+    return typeof patch === 'string' ? patch : '';
+  } catch (error) {
+    console.warn(`ElevenLabs patch could not be read: ${error?.message || error}`);
+    return '';
+  }
 }
 
 function writePage(target, html) {
@@ -55,6 +60,7 @@ function writePage(target, html) {
   console.log(`Wrote ${target} (${Buffer.byteLength(html)} bytes)`);
 }
 
+// Build the original 3.6 page first and independently.
 const original = brandAsNovaAI(
   decodeGzipParts([
     'nova-ai-3-6/app-1.b64',
@@ -64,13 +70,16 @@ const original = brandAsNovaAI(
 );
 writePage('nova-ai-original/index.html', original);
 
+// Build the latest page. A missing optional ElevenLabs patch must not block
+// deployment of the working original page.
 let latest = brandAsNovaAI(
   decodeGzipParts(['app-1.b64', 'app-2.b64', 'app-3.b64']),
 );
 const loaderHtml = fs.readFileSync('index.html', 'utf8');
 const patch = readElevenLabsPatch(loaderHtml);
-if (!patch.trim()) {
-  throw new Error('ElevenLabs patch was not found in the current loader.');
+if (patch.trim()) {
+  latest = latest.replace('</body>', `<script>${patch}<\/script></body>`);
+} else {
+  console.warn('ElevenLabs patch was not found; deploying the base latest page without the optional patch.');
 }
-latest = latest.replace('</body>', `<script>${patch}<\/script></body>`);
 writePage('nova-ai-final/index.html', latest);
