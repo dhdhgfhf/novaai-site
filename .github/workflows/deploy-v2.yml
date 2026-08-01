@@ -1,0 +1,50 @@
+name: Deploy NOVA AI v2 to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build complete NOVA AI 3.6 HTML
+        run: |
+          node scripts/build-original-from-raw-chunks.mjs
+          test -s nova-ai-original/index.html
+          test -s nova-ai-original-clean/index.html
+          grep -q 'initApp' nova-ai-original/index.html
+          if grep -qE '__NOVA_HTML|__NOVA_B64|DecompressionStream|تعذر فك ملفات التطبيق الأصلية' nova-ai-original/index.html; then
+            echo "The generated page still contains loader code"
+            exit 1
+          fi
+          echo "Original size: $(wc -c < nova-ai-original/index.html) bytes"
+          echo "Clean size: $(wc -c < nova-ai-original-clean/index.html) bytes"
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "."
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
