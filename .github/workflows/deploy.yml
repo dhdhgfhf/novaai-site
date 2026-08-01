@@ -24,15 +24,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Verify clean NOVA AI 3.6 files
+      - name: Build complete NOVA AI 3.6 HTML
         run: |
+          node scripts/build-original-raw.mjs
           test -s nova-ai-original/index.html
-          test -s nova-ai-original-clean/index.html
-          for f in raw-1.js raw-2.js raw-3.js raw-4.js raw-5.js raw-6b.js raw-7b.js raw-8b.js; do
-            test -s "nova-ai-original-clean/$f"
-          done
-          grep -q "nova-ai-original-clean" nova-ai-original/index.html
-          echo "Clean NOVA AI 3.6 files are ready"
+          grep -q 'initApp' nova-ai-original/index.html
+          mkdir -p nova-ai-original-clean
+          cp nova-ai-original/index.html nova-ai-original-clean/index.html
+          echo "Original size: $(wc -c < nova-ai-original/index.html) bytes"
+          echo "Clean size: $(wc -c < nova-ai-original-clean/index.html) bytes"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
