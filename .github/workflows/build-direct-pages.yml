@@ -2,12 +2,6 @@ name: Build raw NOVA AI 3.6 page
 
 on:
   workflow_dispatch:
-  push:
-    branches: ["main"]
-    paths:
-      - "scripts/build-original-raw.mjs"
-      - "nova-ai-3-6/app-*.b64"
-      - ".github/workflows/build-direct-pages.yml"
 
 permissions:
   contents: write
