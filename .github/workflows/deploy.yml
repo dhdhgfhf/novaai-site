@@ -1,8 +1,6 @@
-name: Deploy NOVA AI to GitHub Pages
+name: Legacy NOVA AI deployment (manual only)
 
 on:
-  push:
-    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -10,38 +8,9 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
-
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  disabled:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Build complete NOVA AI 3.6 HTML
-        run: |
-          node scripts/build-original-raw.mjs
-          test -s nova-ai-original/index.html
-          grep -q 'initApp' nova-ai-original/index.html
-          mkdir -p nova-ai-original-clean
-          cp nova-ai-original/index.html nova-ai-original-clean/index.html
-          echo "Original size: $(wc -c < nova-ai-original/index.html) bytes"
-          echo "Clean size: $(wc -c < nova-ai-original-clean/index.html) bytes"
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: "."
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Legacy workflow disabled
+        run: echo "Use deploy-v2.yml for NOVA AI Pages deployment."
