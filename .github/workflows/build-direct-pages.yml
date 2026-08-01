@@ -26,7 +26,7 @@ jobs:
         run: |
           test -s nova-ai-original/index.html
           grep -q 'initApp' nova-ai-original/index.html
-          if grep -qE 'part-[123]\.js|Failed to fetch|fetch\(|DecompressionStream|const input=' nova-ai-original/index.html; then
+          if grep -qE 'part-[123]\.js|DecompressionStream|const input=|جاري تشغيل الموقع' nova-ai-original/index.html; then
             echo "Generated page is still a loader instead of the raw app"
             exit 1
           fi
