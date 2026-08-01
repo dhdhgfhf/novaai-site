@@ -1,1 +1,43 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NOVA AI</title><meta http-equiv="refresh" content="0; url=../nova-ai-original-clean/?v=fix27"><style>html,body{height:100%;margin:0;background:#0d0d12;color:#ededf5;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}body{display:grid;place-items:center}.box{text-align:center}.logo{font-size:34px;font-weight:800}.msg{margin-top:14px;color:#9999b5}</style></head><body><div class="box"><div class="logo">NOVA AI</div><div class="msg">جاري فتح النسخة الأصلية…</div></div><script>location.replace('../nova-ai-original-clean/?v=fix27');</script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NOVA AI</title>
+<style>
+html,body{height:100%;margin:0;background:#0d0d12;color:#ededf5;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}body{display:grid;place-items:center}.box{text-align:center;padding:24px}.logo{font-size:34px;font-weight:800}.msg{margin-top:14px;color:#9999b5;line-height:1.8}.err{max-width:650px;color:#ff8bad;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="box"><div class="logo">NOVA AI</div><div class="msg" id="status">جاري تحميل النسخة الأصلية…</div></div>
+<script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+<script>
+(async()=>{
+ const status=document.getElementById('status');
+ try{
+  if(!window.pako) throw new Error('تعذر تحميل أداة فك الضغط. افتح الرابط في Chrome وتأكد من الإنترنت.');
+  const base='https://raw.githubusercontent.com/nova-ai-web-2026/novaai-site/main/nova-ai-3-6/';
+  const names=['app-1.b64','app-2.b64','app-3.b64'];
+  const parts=[];
+  for(let i=0;i<names.length;i++){
+   status.textContent=`جاري تحميل النسخة الأصلية… ${i+1}/${names.length}`;
+   const response=await fetch(base+names[i]+'?v=direct30',{cache:'no-store'});
+   if(!response.ok) throw new Error(`فشل تحميل ${names[i]} — HTTP ${response.status}`);
+   parts.push(await response.text());
+  }
+  let clean=parts.join('').replace(/[^A-Za-z0-9+/]/g,'');
+  clean+='='.repeat((4-clean.length%4)%4);
+  let binary;
+  try{binary=atob(clean)}catch(e){throw new Error('تعذر قراءة بيانات التطبيق الأصلية: '+e.message)}
+  const bytes=new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+  let html;
+  try{html=window.pako.ungzip(bytes,{to:'string'})}catch(e){throw new Error('تعذر فك ملفات التطبيق الأصلية: '+e.message)}
+  if(!html.includes('initApp')) throw new Error('ملف التطبيق النهائي غير مكتمل.');
+  html=html.replace(/<title>[\s\S]*?<\/title>/i,'<title>NOVA AI</title>').replaceAll('NovaAI','NOVA AI');
+  document.open();document.write(html);document.close();
+ }catch(e){status.className='msg err';status.textContent='حدثت مشكلة أثناء تشغيل NOVA AI: '+(e&&e.message?e.message:e)}
+})();
+</script>
+</body>
+</html>
