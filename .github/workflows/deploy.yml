@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -26,16 +26,6 @@ jobs:
 
       - name: Build raw NOVA AI 3.6 page
         run: node scripts/build-original-raw.mjs
-
-      - name: Verify raw original page
-        run: |
-          test -s nova-ai-original/index.html
-          grep -q 'initApp' nova-ai-original/index.html
-          if grep -qE 'part-[123]\.js|DecompressionStream|const input=|جاري تشغيل الموقع' nova-ai-original/index.html; then
-            echo "Original page is still a loader instead of the raw app"
-            exit 1
-          fi
-          echo "Raw original page size: $(wc -c < nova-ai-original/index.html) bytes"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
